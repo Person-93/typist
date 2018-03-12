@@ -4,7 +4,7 @@ include ( helpers )
 start_hunter ()
 option ( TYPIST_WITH_TESTS "Get test dependencies" ON )
 
-project ( typist )
+project ( typist VERSION 0.1 )
 set ( CMAKE_CXX_STANDARD 17 )
 
 if ( ${TYPIST_WITH_TESTS} )
@@ -27,3 +27,31 @@ if ( ${TYPIST_WITH_TESTS} )
     add_executable ( tests tests/tests.cpp )
     target_link_libraries ( tests PRIVATE typist Boost::unit_test_framework )
 endif ()
+
+include ( GenerateExportHeader )
+install ( TARGETS typist EXPORT TypistTargets )
+install ( DIRECTORY include/typist DESTINATION include/typist )
+
+include ( CMakePackageConfigHelpers )
+write_basic_package_version_file ( "${CMAKE_CURRENT_BINARY_DIR}/typist/typistConfigVersion.cmake"
+                                   COMPATIBILITY ExactVersion
+                                   )
+
+export ( EXPORT TypistTargets
+         FILE "${CMAKE_CURRENT_BINARY_DIR}/typist/typistConfigTargets.cmake"
+         NAMESPACE Typist::
+         )
+configure_file ( cmake/typistConfig.cmake
+                 "${CMAKE_CURRENT_BINARY_DIR}/typist/typistConfig.cmake"
+                 COPYONLY
+                 )
+
+set ( ConfigPackageLocation lib/cmake/typist )
+install ( EXPORT TypistTargets
+          FILE typistTargets.cmake
+          NAMESPACE Typist::
+          DESTINATION ${ConfigPackageLocation}
+          )
+install ( FILES cmake/typistConfig.cmake "${CMAKE_CURRENT_BINARY_DIR}/typist/typistConfigVersion.cmake"
+          DESTINATION ${ConfigPackageLocation}
+          )
